@@ -23,14 +23,14 @@ import kotlinx.coroutines.launch
 
 class BookListViewModel(
     private val bookRepository: BookRepository
-): ViewModel(){
+) : ViewModel() {
     private var cachedBooks = emptyList<Book>()
     private var searchJob: Job? = null
 
     private val _state = MutableStateFlow(BookListState())
     val state = _state
         .onStart {
-            if(cachedBooks.isEmpty()){
+            if (cachedBooks.isEmpty()) {
                 observeSearchQuery()
             }
         }
@@ -41,16 +41,18 @@ class BookListViewModel(
         )
 
 
-    fun onAction(action: BookListAction){
-        when(action){
+    fun onAction(action: BookListAction) {
+        when (action) {
             is BookListAction.OnBookClick -> {
 
             }
+
             is BookListAction.OnSearchQueryChange -> {
                 _state.update {
                     it.copy(searchQuery = action.query)
                 }
             }
+
             is BookListAction.OnTabSelected -> {
                 _state.update {
                     it.copy(selectedTabIndex = action.index)
@@ -59,9 +61,9 @@ class BookListViewModel(
         }
     }
 
-    private fun observeSearchQuery(){
+    private fun observeSearchQuery() {
         state
-            .map{ it.searchQuery }
+            .map { it.searchQuery }
             .distinctUntilChanged()
             .debounce(500L)
             .onEach { query ->
@@ -93,25 +95,22 @@ class BookListViewModel(
         bookRepository
             .searchBooks(query)
             .onSuccess { searchResults ->
-                run {
-                    _state.update {
-                        it.copy(
-                            isLoading = false,
-                            errorMessage = null,
-                            searchResults = searchResults
-                        )
-                    }
+                _state.update {
+                    it.copy(
+                        isLoading = false,
+                        errorMessage = null,
+                        searchResults = searchResults
+                    )
                 }
             }
             .onError { error ->
-                run {
-                    _state.update {
-                        it.copy(
-                            searchResults = emptyList(),
-                            isLoading = false,
-                            errorMessage = error.toUiText()
-                        )
-                    }
+                _state.update {
+                    it.copy(
+                        searchResults = emptyList(),
+                        isLoading = false,
+                        errorMessage = error.toUiText()
+                    )
+
                 }
             }
     }
