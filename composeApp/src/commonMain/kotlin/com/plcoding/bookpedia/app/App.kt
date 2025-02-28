@@ -1,5 +1,7 @@
 package com.plcoding.bookpedia.app
 
+import androidx.compose.animation.slideInHorizontally
+import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
@@ -36,7 +38,12 @@ fun App() {
             navigation<Route.BookGraph>(
                 startDestination = Route.BookList
             ){
-                composable<Route.BookList>{
+                composable<Route.BookList>(
+                    exitTransition = { slideOutHorizontally() },
+                    popEnterTransition = {
+                        slideInHorizontally()
+                    }
+                ){
                     val viewModel = koinViewModel<BookListViewModel>()
                     val selectedBookViewModel = it.sharedKoinViewModel<SelectedBookViewModel>(navController)
                     BookListScreenRoot(
@@ -47,7 +54,16 @@ fun App() {
                         }
                     )
                 }
-                composable<Route.BookDetail>{
+                composable<Route.BookDetail>(
+                    enterTransition = { slideInHorizontally{ initialOffset ->
+                                            initialOffset
+                                        }
+                                      },
+                    exitTransition = { slideOutHorizontally{ initialOffset ->
+                            initialOffset
+                        }
+                    }
+                ){
                     val selectedBookViewModel = it.sharedKoinViewModel<SelectedBookViewModel>(navController)
                     val viewModel = koinViewModel<BookDetailViewModel>()
                     val selectedBook by selectedBookViewModel.selectedBook.collectAsStateWithLifecycle()
